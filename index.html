@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html style="height: 100%;margin: 0;padding: 0;">
+<head>
+    <meta charset="utf-8"> 
+	<title>球球面板数据</title>
+	<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">  
+	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+	<script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.3.0/echarts.min.js"></script>
+</head>
+<body>
+	<div class="container" style="position:relative;top:30px">
+		<div id="main" class="col-sm-6" style="height:600px">
+			<script type="text/javascript">
+				function getRequest() {
+					var url = window.location.search; //获取url中"?"符后的字串
+					var theRequest = new Object();
+					if (url.indexOf("?") != -1) {
+						var str = url.substr(1);
+						strs = str.split("&");
+						for(var i = 0; i < strs.length; i ++) {
+							theRequest[strs[i].split("=")[0]]=decodeURI(strs[i].split("=")[1]);
+						}
+					}
+					return theRequest;
+				}
+				function convert(a){
+					var b=new Object();
+					b.name=a.name;
+					b.R=a.R;b.G=a.G;b.B=a.B;
+					for(var i=0;i<=6;i++)if(a.label1=="0EDCBA∞"[i])b.label1=i;
+					for(var i=0;i<=6;i++)if(a.label2=="0EDCBA∞"[i])b.label2=i;
+					for(var i=0;i<=6;i++)if(a.label3=="0EDCBA∞"[i])b.label3=i;
+					for(var i=0;i<=6;i++)if(a.label4=="0EDCBA∞"[i])b.label4=i;
+					for(var i=0;i<=6;i++)if(a.label5=="0EDCBA∞"[i])b.label5=i;
+					for(var i=0;i<=6;i++)if(a.label6=="0EDCBA∞"[i])b.label6=i;
+					return b;
+				}
+				var Req=getRequest();
+				if(Req.name==undefined)Req.name="";
+				if(Req.R==undefined)Req.R="0";
+				if(Req.G==undefined)Req.G="0";
+				if(Req.B==undefined)Req.B="0";
+				if(Req.label1==undefined)Req.label1="0";
+				if(Req.label2==undefined)Req.label2="0";
+				if(Req.label3==undefined)Req.label3="0";
+				if(Req.label4==undefined)Req.label4="0";
+				if(Req.label5==undefined)Req.label5="0";
+				if(Req.label6==undefined)Req.label6="0";
+				var req=convert(Req);
+				// 基于准备好的 dom，初始化 echarts 实例
+				var myChart = echarts.init(document.getElementById('main'));
+				// 指定图表的配置项和数据
+				var option = {
+					title: {
+						text: req.name,
+						textStyle: {
+							color: 'rgba(0,0,0,1)', //标题颜色
+							fontSize: 30,
+							lineHeight: 60,
+						},
+						// 标题的位置，此时放在图的底边
+						left: 'center',
+						top: 'top',
+					},
+					// 图表的位置
+					grid: {
+						position: 'center',
+					 },
+					 tooltip : {
+					 //雷达图的tooltip不会超出div，也可以设置position属性，position定位的tooltip
+						confine: true,
+						enterable: true, //鼠标是否可以移动到tooltip区域内
+					 },
+					radar: {
+						shape: 'circle',
+						splitNumber: 6, // 雷达图圈数设置
+						name: {
+							textStyle: {
+								color: '#000000',
+								fontSize: 20,
+							},
+						},
+						// 设置雷达图中间射线的颜色
+						axisLine: {
+							lineStyle: {
+								color: 'rgba(131,141,158,.1)',
+								},
+						},
+						indicator: [{
+							name: '力量：'+Req.label1, max: 6,
+							//若将此属性放在radar下，则每条indicator都会显示圈上的数值，放在这儿，只在通信这条indicator上显示
+							axisLabel: {
+								show: false,
+								fontSize: 12,
+								color: '#838D9E',
+								showMaxLabel: false, //不显示最大值，即外圈不显示数字30
+								showMinLabel: false, //显示最小数字，即中心点显示0
+							},
+						},
+						{ name: '人气：'+Req.label6, max: 6},
+						{ name: '精密操作性：'+Req.label5, max: 6},
+						{ name: '持续力：'+Req.label4, max: 6},
+						{ name: '运气：'+Req.label3, max: 6},
+						{ name: '速度：'+Req.label2, max: 6},
+						],
+						//雷达图背景的颜色，在这儿随便设置了一个颜色，完全不透明度为0，就实现了透明背景
+						splitArea : {
+							show : false,
+							areaStyle : {
+								color: 'rgba(255,0,0,0)', // 图表背景的颜色
+							},
+						},
+						splitLine : {
+							show : true,
+							lineStyle : {
+								width : 1,
+								color : 'rgba(131,141,158,.1)', // 设置网格的颜色
+							},
+						},
+					},
+					series: [{
+						name: req.name, // tooltip中的标题
+						type: 'radar', //表示是雷达图
+						symbol: 'circle', // 拐点的样式，还可以取值'rect','angle'等
+						symbolSize: 8, // 拐点的大小
+
+						areaStyle: {
+							normal: {
+								opacity: 0.2,
+							},
+						},
+						data: [
+							{
+								value: [req.label1, req.label6, req.label5, req.label4, req.label3, req.label2],
+								name: req.name,
+								// 设置区域边框和区域的颜色
+								itemStyle: {
+									normal: {
+										color: "rgba("+req.R+","+req.G+","+req.B+",0.3)",
+										lineStyle: {
+											color: "rgba("+req.R+","+req.G+","+req.B+",0.3)",
+										},
+									},
+								},
+							},
+						],
+					}],
+				}
+				// 使用刚指定的配置项和数据显示图表。
+				myChart.setOption(option);
+			</script>
+		</div>
+		<div class="col-sm-6">
+			<form role="form" class="form-horizontal">
+				<div class="form-group">
+					<label for="name">名称</label>
+					<input type="text" class="form-control" autocomplete="off" name="name" placeholder="请输入名称">
+				</div>
+				<div class="form-group">
+					<label for="name" class="col-sm-3 control-label">颜色</label>
+						<div class="col-sm-3"><input type="text" class="form-control" autocomplete="off" name="R" placeholder="R"></div>
+						<div class="col-sm-3"><input type="text" class="form-control" autocomplete="off" name="G" placeholder="G"></div>
+						<div class="col-sm-3"><input type="text" class="form-control" autocomplete="off" name="B" placeholder="B"></div>
+				</div>
+				<div class="form-group">
+					<label for="name" class="control-label">力量</label>
+					<select class="form-control" name="label1">
+						<option>∞</option>
+						<option>A</option>
+						<option>B</option>
+						<option>C</option>
+						<option>D</option>
+						<option>E</option>
+						<option>0</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="name">速度</label>
+					<select class="form-control" name="label2">
+						<option>∞</option>
+						<option>A</option>
+						<option>B</option>
+						<option>C</option>
+						<option>D</option>
+						<option>E</option>
+						<option>0</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="name">运气</label>
+					<select class="form-control" name="label3">
+						<option>∞</option>
+						<option>A</option>
+						<option>B</option>
+						<option>C</option>
+						<option>D</option>
+						<option>E</option>
+						<option>0</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="name">持续力</label>
+					<select class="form-control" name="label4">
+						<option>∞</option>
+						<option>A</option>
+						<option>B</option>
+						<option>C</option>
+						<option>D</option>
+						<option>E</option>
+						<option>0</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="name">精密操作性</label>
+					<select class="form-control" name="label5">
+						<option>∞</option>
+						<option>A</option>
+						<option>B</option>
+						<option>C</option>
+						<option>D</option>
+						<option>E</option>
+						<option>0</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="name">人气</label>
+					<select class="form-control" name="label6">
+						<option>∞</option>
+						<option>A</option>
+						<option>B</option>
+						<option>C</option>
+						<option>D</option>
+						<option>E</option>
+						<option>0</option>
+					</select>
+				</div>
+				<button type="submit" class="btn btn-block btn-default">提交</button>
+			</form>
+			<script type="text/javascript">
+				$("input")[0].value=Req.name;
+				$("input")[1].value=Req.R;
+				$("input")[2].value=Req.G;
+				$("input")[3].value=Req.B;
+				$("select")[0].value=Req.label1;
+				$("select")[1].value=Req.label2;
+				$("select")[2].value=Req.label3;
+				$("select")[3].value=Req.label4;
+				$("select")[4].value=Req.label5;
+				$("select")[5].value=Req.label6;
+			</script>
+		</div>
+	</div>
+</body>
+</html>
